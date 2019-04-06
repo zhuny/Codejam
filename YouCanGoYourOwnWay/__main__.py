@@ -14,7 +14,16 @@ def get_ints():
 
 
 def do_one_step():
-    return get_int()
+    N = get_int()
+    path = get_line()
+    if len(path) != (N-1)*2:
+        return ""
+
+    my_path = [
+        'S' if p == 'E' else 'E'
+        for p in path
+    ]
+    return "".join(my_path)
 
 
 def main():

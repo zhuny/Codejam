@@ -1,5 +1,6 @@
 import os
 import runpy
+import subprocess
 import sys
 import time
 from shutil import copyfile
@@ -11,19 +12,33 @@ class TwoWay:
         self.stdout_file = f_out
 
     def __enter__(self):
-        sys.stdin = self.stdin_file
+        sys.stdin = self
         sys.stdout = self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdin = sys.__stdin__
         sys.stdout = sys.__stdout__
 
-    def write(self, *args, **kwargs):
-        self.stdout_file.write(*args, **kwargs)
+    def write_(self, *args, **kwargs):
         sys.__stdout__.write(*args, **kwargs)
+        self.stdout_file.write(*args, **kwargs)
+
+    def write(self, b):
+        sys.__stdout__.write(b)
+        if 'b' in self.stdout_file.mode:
+            b = b.encode()
+        self.stdout_file.write(b)
 
     def flush(self, *args, **kwargs):
         sys.__stdout__.flush(*args, **kwargs)
+        self.stdout_file.flush()
+
+    def readline(self):
+        result = self.stdin_file.readline()
+        if isinstance(result, bytes):
+            result = result.decode()
+        sys.__stdout__.write("< "+result)
+        return result
 
 
 class Timer:
@@ -46,16 +61,18 @@ class Command:
         @name: Name of Problem
         """
         for inf in os.listdir(name):
-            if not inf.endswith('.in'):
-                continue
-            print("test file:", inf)
-            inf = os.path.join(name, inf)
-            outf = os.path.splitext(inf)[0]+'.out'
-            with open(inf) as f_in:
-                with open(outf, 'w') as f_out:
-                    with Timer():
-                        with TwoWay(f_in, f_out):
-                            runpy.run_path(name, run_name="__main__")
+            finf = os.path.join(name, inf)
+            basename, ext = os.path.splitext(inf)
+            if ext == '.in':
+                self._run_in(name, finf, os.path.join(name, basename)+'.out')
+
+    def _run_in(self, name, inf, outf):
+        print("test file:", inf)
+        with open(inf) as f_in:
+            with open(outf, 'w') as f_out:
+                with Timer():
+                    with TwoWay(f_in, f_out):
+                        runpy.run_path(name, run_name="__main__")
 
     def create(self, name):
         """
@@ -97,6 +114,19 @@ class Command:
                 print(name, '-')
                 print(func.__doc__)
                 print()
+
+    def inter(self, name):
+        """
+        execute as interactive mode
+        """
+        inter = subprocess.Popen(
+            ["python", os.path.join(name, "testing_tool.py"), "1"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE
+        )
+        with Timer():
+            with TwoWay(inter.stdout, inter.stdin):
+                runpy.run_path(name, run_name="__main__")
 
 
 if __name__ == "__main__":
