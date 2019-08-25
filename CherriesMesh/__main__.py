@@ -18,8 +18,13 @@ class DisjointSet:
         self.mapping = [i for i in range(count)]
 
     def _root(self, p):
+        path = [p]
         while p != self.mapping[p]:
             p = self.mapping[p]
+            path.append(p)
+        if len(path) > 2:
+            for l in path:
+                self.mapping[l] = p
         return p
 
     def is_connected(self, p1, p2):
