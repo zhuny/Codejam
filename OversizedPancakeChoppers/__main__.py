@@ -1,5 +1,8 @@
+import bisect
 import collections
+import time
 from fractions import Fraction
+from math import gcd
 
 
 def get_int():
@@ -19,44 +22,67 @@ def get_ints():
 
 class CakeSize:
     def __init__(self):
-        self.cuts = {0: 0}
+        self.body = []
+        self.up = []
+        self.sorted = False
 
-    @staticmethod
-    def _cut_item(n):
-        yield 0, 0
-        for i in range(n):
-            yield i+1, i+1
-        yield n+1, n
+    def update(self, count, limit):
+        self.body.append(count)
+        self.sorted = False
 
-    def update(self, cut_add):
-        cut_after = collections.defaultdict(list)
-        for people1, cut1 in self.cuts.items():
-            for people2, cut2 in self._cut_item(cut_add):
-                cut_after[people1+people2].append(cut1+cut2)
-        for people, cut in cut_after.items():
-            if people <= 50:
-                self.cuts[people] = min(cut, default=-1)
+    def check_sort(self):
+        if self.sorted:
+            return
+        self.sorted = True
 
-    def check(self, people):
-        return self.cuts.get(people)
+        self.body.sort()
+        self.up = []
+        s = 0
+        for i in self.body:
+            s += i
+            self.up.append(s)
+
+    def valid(self, count):
+        self.check_sort()
+
+        profit = bisect.bisect_right(self.up, count)
+        if len(self.up) == profit:
+            return self.up[-1]-profit, count-self.up[-1]
+        else:
+            return count-profit, 0
+
+
+def has_left(int_list, target, left, limit):
+    index = bisect.bisect_left(int_list, target)
+    while index < len(int_list) and left > 0:
+        div = int_list[index] / target
+        if div.denominator > 1 or int_list[index] > target*limit:
+            left -= int(div)
+        index += 1
+    return left <= 0
 
 
 def do_one_step():
     N, D = get_ints()
     Ai = get_ints()
+    Ai.sort()
 
-    count = collections.defaultdict(CakeSize)
+    target_container = collections.defaultdict(CakeSize)
 
     for a in Ai:
         for i in range(1, D+1):
-            count[Fraction(a, i)].update(i-1)
+            g = gcd(a, i)
+            f = a // g, i // g
+            # Fraction hash가 오래 걸린다.
+            target_container[f].update(i, D)
 
     answer = D-1
 
-    for k, v in count.items():
-        check = v.check(D)
-        if check is not None:
-            answer = min(answer, check)
+    for target, container in target_container.items():
+        cut, left = container.valid(D)
+        # print(target, vars(container), cut, left)
+        if has_left(Ai, Fraction(*target), left, D):
+            answer = min(answer, cut+left)
 
     return answer
 
