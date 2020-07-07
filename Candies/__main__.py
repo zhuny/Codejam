@@ -13,26 +13,38 @@ def get_ints():
     ]
 
 
-def alter_sum(A):
-    new_list = []
-    alter = 0
-    for i in reversed(A):
-        alter = i-alter
-        new_list.append(alter)
-    new_list.reverse()
-    return new_list
+class RangeSum:
+    def __init__(self, body):
+        self.original = list(body)
+        self.body = []
+        while body:
+            self.body.append(body)
+            body = [x+y for x, y in zip(body[::2], body[1::2])]
+
+    def __setitem__(self, key, value):
+        delta = value - self.original[key]
+        self.original[key] = value
+        for body in self.body:
+            if key < len(body):
+                body[key] += delta
+            key //= 2
+
+    def query(self, start, end):
+        total = 0
+        for body in self.body:
+            if start < end:
+                if start % 2 == 1:
+                    total += body[start]
+                    start += 1
+                if end % 2 == 1:
+                    end -= 1
+                    total += body[end]
+            start, end = start // 2, end // 2
+        return total
 
 
-def alter_twice(A):
-    A1 = alter_sum(A)
-    A2 = alter_sum(A1)
-    A1.append(0)
-    A2.append(0)
-    return A1, A2
-
-
-def sign(index):
-    if index % 2 == 0:
+def sign(n):
+    if n % 2 == 0:
         return 1
     else:
         return -1
@@ -42,24 +54,28 @@ def do_one_step():
     N, Q = get_ints()
     A = get_ints()
 
-    A1, A2 = alter_twice(A)
+    q_alter = RangeSum([a*sign(i) for i, a in enumerate(A)])
+    qs_alter = RangeSum([
+        a*sign(i)*(i+1) for i, a in enumerate(A)
+    ])
 
-    query_result = 0
+    answer = 0
 
-    for i in range(Q):
+    for _ in range(Q):
         command, start, end = get_line().split()
-        start, end = int(start), int(end)
+        start, end = int(start)-1, int(end)
 
-        if command == "U":
-            A[start-1] = end
-            A1, A2 = alter_twice(A)
+        if command == "Q":
+            answer += (
+                qs_alter.query(start, end) -
+                q_alter.query(start, end) * start
+            ) * sign(start)
 
-        elif command == "Q":
-            start -= 1
-            left_far = A2[end] + A1[end] * (end-start)
-            query_result += A2[start] - left_far * sign(start-end)
+        elif command == "U":
+            q_alter[start] = end * sign(start)
+            qs_alter[start] = end * sign(start) * (start+1)
 
-    return query_result
+    return answer
 
 
 def main():
