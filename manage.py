@@ -93,12 +93,12 @@ class Command:
 
     def version(self):
         """
-        you should run this on python35
+        you should run this on python37
         """
         assert (
             sys.version_info.major == 3 and
-            sys.version_info.minor == 5
-        ), "python35 is required"
+            sys.version_info.minor == 7
+        ), "python37 is required"
 
     def help(self):
         """
@@ -120,7 +120,7 @@ class Command:
         execute as interactive mode
         """
         inter = subprocess.Popen(
-            ["python", os.path.join(name, "testing_tool.py"), "1"],
+            ["python", os.path.join(name, "testing_tool.py"), "2"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE
         )
@@ -141,5 +141,3 @@ if __name__ == "__main__":
         argv = sys.argv[2:]
 
     getattr(command, func)(*argv)
-
-
