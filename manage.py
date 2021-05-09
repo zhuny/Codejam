@@ -129,7 +129,7 @@ class Command:
                 runpy.run_path(name, run_name="__main__")
 
 
-if __name__ == "__main__":
+def run():
     command = Command()
 
     if len(sys.argv) < 2:
@@ -141,3 +141,7 @@ if __name__ == "__main__":
         argv = sys.argv[2:]
 
     getattr(command, func)(*argv)
+
+
+if __name__ == "__main__":
+    run()
