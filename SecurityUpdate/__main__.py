@@ -56,22 +56,61 @@ class Graph:
         )
 
 
+def normalize(x_list):
+    x_time_list = [
+        (x, index)
+        for index, x in enumerate(x_list)
+        if x > 0
+    ]
+    x_time_list.sort(reverse=True)
+
+    x_pos_list = [
+        (x, index)
+        for index, x in enumerate(x_list)
+        if x < 0
+    ]
+    x_pos_list.sort(reverse=True)
+
+    x_merge_list = []
+    for x, index in x_pos_list:
+        while len(x_merge_list) + x + 1 < 0:
+            x_merge_list.append(x_time_list.pop())
+        x_merge_list.append((x, index))
+    while x_time_list:
+        x_merge_list.append(x_time_list.pop())
+
+    x_result_list = []
+    current_time = 0
+    current_number = 0
+    for i, (x, index) in enumerate(x_merge_list, 1):
+        if x > 0:
+            x_result_list.append((x, index))
+            current_time = x
+            current_number = i
+        elif current_number + x < 0:
+            current_time += 1
+            current_number = -x
+            x_result_list.append((current_time, index))
+        else:
+            x_result_list.append((current_time, index))
+
+    x_index_list = [0 for x in x_result_list]
+    for x, index in x_result_list:
+        x_index_list[index] = x
+    return x_index_list
+
+
 def do_one_step():
     c, d = get_ints()
-    x_list = get_ints()
+    x_list = normalize(get_ints())
 
     g = Graph(c)
     for i, reached_time in enumerate(x_list, 2):
-        g.set_vertex(i, -reached_time)
+        g.set_vertex(i, reached_time)
 
     for i in range(d):
         u, v = get_ints()
         g.connect(u, v, i)
-
-    for x in x_list:
-        if x > 0:
-            # do not run test set 2
-            return "-"
 
     return g.answer()
 
