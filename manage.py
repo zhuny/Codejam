@@ -85,7 +85,7 @@ class Command:
         return self.base / "solution" / h[0] / h / name
 
     def _get_skeleton_folder(self) -> Path:
-        return self.base / "_skeleton"
+        return self.base / "skeleton"
 
     def run(self, name):
         """
