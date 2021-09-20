@@ -3,6 +3,7 @@ import runpy
 import subprocess
 import sys
 import time
+from pathlib import Path
 from shutil import copyfile
 
 
@@ -54,6 +55,9 @@ class Timer:
 
 
 class Command:
+    def __init__(self):
+        self.base = Path(".")
+
     def run(self, name):
         """
         Create New Codejam Problem
@@ -74,22 +78,25 @@ class Command:
                     with TwoWay(f_in, f_out):
                         runpy.run_path(name, run_name="__main__")
 
+    def _get_folder(self, name) -> Path:
+        return self.base / name
+
+    def _get_skeleton_folder(self) -> Path:
+        return self.base / "_skeleton"
+
     def create(self, name):
         """
         Create New Codejam Problem
         @name: Name of Problem
         """
-        if os.path.isdir(name):
+        f_folder = self._get_folder(name)
+        if f_folder.exists():
             print("exist path : ", name)
             return
 
-        os.mkdir(name)
-        skeleton = '_skeleton'
-        for f in os.listdir(skeleton):
-            copyfile(
-                os.path.join(skeleton, f),
-                os.path.join(name, f)
-            )
+        f_folder.mkdir(parents=True, exist_ok=True)
+        for temp_file in self._get_skeleton_folder().glob("*"):
+            copyfile(temp_file, f_folder / temp_file.name)
 
     def version(self):
         """
