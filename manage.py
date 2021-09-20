@@ -54,18 +54,38 @@ class Timer:
         print("Running time : {duration:.06}".format(duration=duration))
 
 
+class Hasher:
+    def __init__(self, string):
+        self.string = string
+
+    @staticmethod
+    def char_to_int(char):
+        return ord(char.lower()) - ord('a')
+
+    @staticmethod
+    def int_to_char(number):
+        return chr(ord('A') + number % 26)
+
+    def get(self):
+        nums = [0, 0]
+        for i, char in enumerate(self.string):
+            nums[i % 2] += self.char_to_int(char)
+        return "".join(self.int_to_char(num) for num in nums)
+
+
 class Command:
     def __init__(self):
         self.base = Path(".")
 
+    def _get_hash(self, name):
+        return Hasher(name).get()
+
     def _get_folder(self, name) -> Path:
-        return self.base / name
+        h = self._get_hash(name)
+        return self.base / "solution" / h[0] / h / name
 
     def _get_skeleton_folder(self) -> Path:
         return self.base / "_skeleton"
-
-    def _get_path(self, name) -> Path:
-        return name
 
     def run(self, name):
         """
@@ -88,7 +108,7 @@ class Command:
                 with Timer():
                     with TwoWay(f_in, f_out):
                         runpy.run_path(
-                            self._get_path(name),
+                            str(self._get_folder(name)),
                             run_name="__main__"
                         )
 
