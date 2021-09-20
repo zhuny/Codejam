@@ -135,7 +135,11 @@ class Command:
         execute as interactive mode
         """
         inter = subprocess.Popen(
-            ["python", os.path.join(name, "testing_tool.py"), "2"],
+            [
+                "python",
+                self._get_folder(name) / "testing_tool.py",
+                "2"
+            ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE
         )
