@@ -119,14 +119,19 @@ class Command:
         """
         f_folder = self._get_folder(name)
         if f_folder.exists():
-            print("exist path : ", name)
-            return
+            print("exist path : ", f_folder)
 
-        print("create new problem :", name)
-        f_folder.mkdir(parents=True, exist_ok=True)
-        for temp_file in self._get_skeleton_folder().glob("*"):
-            copyfile(temp_file, f_folder / temp_file.name)
-            print("copy file,", temp_file, "=>", f_folder / temp_file.name)
+        else:
+            print("create new problem :", name)
+            f_folder.mkdir(parents=True, exist_ok=True)
+            for temp_file in self._get_skeleton_folder().glob("*"):
+                copyfile(temp_file, f_folder / temp_file.name)
+                print("copy file,", temp_file, "=>", f_folder / temp_file.name)
+
+        print("Goto and Enjoy!")
+
+        main_file = f_folder / "__main__.py"
+        print(f'File "{main_file.absolute()}", line 1')
 
     def version(self):
         """
