@@ -102,9 +102,11 @@ class Command:
             print("exist path : ", name)
             return
 
+        print("create new problem :", name)
         f_folder.mkdir(parents=True, exist_ok=True)
         for temp_file in self._get_skeleton_folder().glob("*"):
             copyfile(temp_file, f_folder / temp_file.name)
+            print("copy file,", temp_file, "=>", f_folder / temp_file.name)
 
     def version(self):
         """
