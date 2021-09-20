@@ -58,31 +58,39 @@ class Command:
     def __init__(self):
         self.base = Path(".")
 
+    def _get_folder(self, name) -> Path:
+        return self.base / name
+
+    def _get_skeleton_folder(self) -> Path:
+        return self.base / "_skeleton"
+
+    def _get_path(self, name) -> Path:
+        return name
+
     def run(self, name):
         """
         Create New Codejam Problem
         code < *.in > *.out
         @name: Name of Problem
         """
-        for inf in os.listdir(name):
-            finf = os.path.join(name, inf)
-            basename, ext = os.path.splitext(inf)
-            if ext == '.in':
-                self._run_in(name, finf, os.path.join(name, basename)+'.out')
+        if not self._get_folder(name).exists():
+            print("create first :", name)
+            return
 
-    def _run_in(self, name, inf, outf):
-        print("test file:", inf)
-        with open(inf) as f_in:
-            with open(outf, 'w') as f_out:
+        for in_file in self._get_folder(name).glob('*.in'):
+            out_file = in_file.parent / f"{in_file.stem}.out"
+            self._run_in(name, in_file, out_file)
+
+    def _run_in(self, name, in_f, out_f):
+        print("test file :", in_f)
+        with in_f.open() as f_in:
+            with out_f.open('w') as f_out:
                 with Timer():
                     with TwoWay(f_in, f_out):
-                        runpy.run_path(name, run_name="__main__")
-
-    def _get_folder(self, name) -> Path:
-        return self.base / name
-
-    def _get_skeleton_folder(self) -> Path:
-        return self.base / "_skeleton"
+                        runpy.run_path(
+                            self._get_path(name),
+                            run_name="__main__"
+                        )
 
     def create(self, name):
         """
