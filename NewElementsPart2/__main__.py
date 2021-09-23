@@ -18,65 +18,89 @@ def get_ints():
     ]
 
 
-def do_one_step_or_none_hard():
+def max_fraction(num1, num2):
+    if is_upper(num1, num2):
+        return num2
+    else:
+        return num1
+
+
+def min_fraction(num1, num2):
+    if is_upper(num1, num2):
+        return num1
+    else:
+        return num2
+
+
+def is_upper(num1, num2):
+    return num1[0]*num2[1] < num1[1]*num2[0]
+
+
+def conti(my_list):
+    before = None
+    for e in my_list:
+        if before is not None:
+            yield before, e
+        before = e
+
+
+def normalize(a):
+    d = math.gcd(*a)
+    return a[0] // d, a[1] // d
+
+
+def do_one_step_wrap():
     n = get_int()
-    pairs = [get_ints() for i in range(n)]
+    point_list = [get_ints() for i in range(n)]
 
-    BOUND = 1000
-    min_valid = Fraction(1, BOUND)
-    max_valid = Fraction(BOUND, 1)
+    lower = 0, 1
+    upper = 1, 0
 
-    for p1, p2 in itertools.combinations(pairs, 2):
-        d1 = p2[0]-p1[0]
-        d2 = p2[1]-p1[1]
+    for p1, p2 in conti(point_list):
+        dx = p2[0] - p1[0]
+        dy = p2[1] - p1[1]
 
-        if 0 <= d1 and 0 <= d2:
+        if dx <= 0 and dy <= 0:
+            return
+        elif dx >= 0 and dy >= 0:
             continue
-        elif d1 < 0 < d2:
-            min_valid = max(min_valid, Fraction(d2, -d1))
-        elif d2 < 0 < d1:
-            max_valid = min(max_valid, Fraction(-d2, d1))
+        elif dx > 0:
+            upper = min_fraction(upper, (dx, -dy))
         else:
-            return
+            lower = max_fraction(lower, (-dx, dy))
 
-        if max_valid <= min_valid:
-            return
+    if is_upper(lower, upper):
+        lower = normalize(lower)
+        upper = normalize(upper)
 
-    for i in range(1, BOUND):
-        m = min_valid*i
-        v, r = divmod(m.numerator, m.denominator)
-        v += 1
-        if v < max_valid*i:
-            return i, v
+        for x in range(1, 200):
+            p, r = divmod(x*lower[0], lower[1])
+            if is_upper((p+1, x), upper):
+                return x, p+1
 
-    # maybe unreachable
+        lower = Fraction(*lower)
+        upper = Fraction(*upper)
 
+        average: Fraction = (lower + upper) / 2
+        limit = lower.denominator + upper.denominator + 1
 
-def is_sorted(l):
-    n = len(l)
-    for i in range(1, n):
-        if l[i-1] >= l[i]:
-            return False
-    return True
+        for c in closest(average, limit):
+            if lower < c < upper:
+                return c.denominator, c.numerator
 
 
-def do_one_step_or_none():
-    BOUND = 200
-
-    n = get_int()
-    pairs = [get_ints() for i in range(n)]
-
-    for x in range(1, BOUND):
-        for y in range(1, BOUND):
-            pairs_weight = [
-                px*x+py*y for px, py in pairs
-            ]
-            if is_sorted(pairs_weight):
-                return x, y
+def closest(frac: Fraction, limit: int):
+    sim_list = []
+    while limit > 150:
+        sim = frac.limit_denominator(limit)
+        sim_list.append(sim)
+        limit = sim.denominator-1
+    sim_list.reverse()
+    return sim_list
 
 
 def do_one_step():
-    answer = do_one_step_or_none()
+    answer = do_one_step_wrap()
     if answer is None:
         return "IMPOSSIBLE"
     else:
@@ -91,4 +115,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

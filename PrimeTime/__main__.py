@@ -1,6 +1,3 @@
-import heapq
-
-
 def get_int():
     return int(input())
 
@@ -16,82 +13,61 @@ def get_ints():
     ]
 
 
-def is_far(left, right):
-    return right is None or left + 1 < right
-
-
-def middle(left, right):
-    if right is None:
-        if left == 0:
-            return 1
-        else:
-            return left * 2
-    else:
-        return (right + left) >> 1
-
-
-def min_make_sum(count, numbers):
-    return make_sum(count, numbers, False)
-
-
-def max_make_sum(count, numbers):
-    return make_sum(count, numbers, True)
-
-
-def make_sum(count, numbers, reverse):
-    sum_num = 0
-    prod_num = 1
-
-    for p, e in sorted(numbers, reverse=reverse):
-        used = min(count, e)
-        sum_num += used*p
-        prod_num *= pow(p, used)
-        count -= used
-        if count == 0:
+def prime(n):
+    prime_list = list(range(2, n + 1))
+    for i in range(2, n):
+        if i * i > n:
             break
+        prime_list = [
+            p
+            for p in prime_list
+            if p <= i or i % p != 0
+        ]
+    return prime_list
 
-    return sum_num + prod_num
+
+def factorization(num, primes):
+    f = []
+    for p in primes:
+        if num == 1:
+            break
+        po = 0
+        while num % p == 0:
+            num //= p
+            po += 1
+        if po > 0:
+            f.append((p, po))
+    if num == 1:
+        return f
+    else:
+        return []
 
 
-def find_sum(count, numbers, target):
-    pass
+def valid_factor(factor, pair_dict):
+    for p, e in factor:
+        if pair_dict.get(p, 0) < e:
+            return False
+    return True
 
 
 def do_one_step():
-    m = get_int()
-    numbers = [get_ints() for i in range(m)]
+    n = get_int()
+    pairs = [get_ints() for i in range(n)]
+    pair_dict = dict(pairs)
 
-    target = sum(x*y for x, y in numbers)
+    pair_sum = sum(x * y for x, y in pairs)
+    used_prime = set(x for x, y in pairs)
+    primes = [p for p in prime(500) if p in used_prime]
 
-    heap = []
+    for num in range(pair_sum, max(pair_sum - 30000, 0), -1):
+        factor = factorization(num, primes)
+        if len(factor) == 0:
+            continue
 
-    for i, pair in enumerate(numbers):
-        x = pair[0]
-        current = [0] * len(numbers)
-        current[i] = 1
-        heapq.heappush(
-            heap,
-            (2*x, x, x, x, current)
-        )
+        factor_sum = sum(x * y for x, y in factor)
+        if valid_factor(factor, pair_dict) and num + factor_sum == pair_sum:
+            return num
 
-    while heap:
-        t, sn, pn, max_p, v = heapq.heappop(heap)
-        if t == target:
-            return pn
-        elif target < t:
-            return 0
-
-        for i, pair in enumerate(numbers):
-            if max_p <= pair[0] and v[i] < pair[1]:
-                next_list = list(v)
-                next_list[i] += 1
-                new_sn = sn + pair[0]
-                new_pn = pn * pair[0]
-                if new_sn + new_pn <= target:
-                    heapq.heappush(
-                        heap,
-                        (new_sn+new_pn, new_sn, new_pn, pair[0], next_list)
-                    )
     return 0
 
 

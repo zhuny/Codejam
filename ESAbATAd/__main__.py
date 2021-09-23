@@ -1,3 +1,6 @@
+import sys
+
+
 def get_int():
     return int(input())
 
@@ -14,92 +17,75 @@ def get_ints():
 
 
 class Problem:
-    def __init__(self, count, size):
-        self.reflect = False
-        self.complement = False
-        self.count = count
+    def __init__(self, size):
         self.size = size
         self.bit_list = [-1] * size
 
-    def check(self, i, replace=True):
-        print(i+1)
-        result = get_int()
-        if self.complement:
-            result = 1-result
-        if self.reflect:
-            i = self.size-i-1
-        if replace:
-            self.bit_list[i] = result
-        return result
+    def get(self, pos):
+        print(pos+1)
+        return get_int()
 
-    def ask_one_state(self, i):
-        self.check(i)
-        self.check(self.size-i-1)
-
-    def ask_state(self, count):
-        done = 0
-        for i, value in enumerate(self.bit_list):
+    def load_bits(self, count):
+        for i, v in enumerate(self.bit_list):
             if count == 0:
                 break
-            if value == -1:
-                self.ask_one_state(i)
+            if v == -1:
+                self.bit_list[i] = self.get(i)
+                self.bit_list[~i] = self.get(self.size-i-1)
                 count -= 1
-                done += 1
+        for i in range(count*2):
+            self.get(0)
 
-        for i in range(count):
-            self.ask_one_state(i)
-            done += 1
-
-        return done*2
+    def not_yet(self):
+        return -1 in self.bit_list
 
     def check_complement(self):
-        for i in range(self.size):
-            if self.bit_list[i] is None:
+        for i, v in enumerate(self.bit_list):
+            if v == -1:
                 break
-            if self.bit_list[i] == self.bit_list[self.size-i-1]:
-                state = self.check(i, replace=False)
-                self.complement = (self.bit_list[i] != state)
-                return 2
+            if v == self.bit_list[~i]:
+                if v != self.get(i):
+                    for i2, v2 in enumerate(self.bit_list):
+                        if v2 != -1:
+                            self.bit_list[i2] = 1-v2
+                return 1
         return 0
 
     def check_reflect(self):
-        for i in range(self.size):
-            if self.bit_list[i] is None:
+        for i, v in enumerate(self.bit_list):
+            if v == -1:
                 break
-            if self.bit_list[i] != self.bit_list[self.size-i-1]:
-                state = self.check(i, replace=False)
-
-                return 2
+            if v != self.bit_list[~i]:
+                if v != self.get(i):
+                    self.bit_list.reverse()
+                return 1
         return 0
 
-    def remaind(self, count):
-        if count % 5 == 0:
-            return 5
-        else:
-            return count % 5
-
-    def check_result(self):
-        result = [state if state >= 0 else state == "?" for state in self.bit_list]
-        if self.complement:
-            result = [1-state for state in self.bit_list]
-        if self.reflect:
-            result = list(reversed(result))
-        print("".join(map(str, result)))
-        assert get_line() == "Y", vars(self)
+    def get_bits_str(self):
+        return "".join(map(str, self.bit_list))
 
     def solve(self):
-        rest = self.count - self.ask_state(5)
-        while rest > 0:
-            rest -= self.check_complement()
-            rest -= self.check_reflect()
-            rest -= self.ask_state(self.remaind(rest))
-        self.check_result()
+        self.load_bits(5)
+
+        while self.not_yet():
+            count = 10
+            count -= self.check_complement()
+            count -= self.check_reflect()
+            self.load_bits(count//2)
+            if count % 2 == 1:
+                self.get(0)
+
+        print(self.get_bits_str())
+
+        result = get_line()
+        if result == "N":
+            assert False, vars(self)
 
 
 def main():
     n, t = get_ints()
     for i in range(1, n+1):
-        Problem(n, t).solve()
+        Problem(t).solve()
 
 
 if __name__ == "__main__":

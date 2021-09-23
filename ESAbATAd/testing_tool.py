@@ -1,4 +1,4 @@
-# Usage: `python local_testing_tool.py test_number`, where the argument
+# Usage: `python testing_tool.py test_number`, where the argument
 # test_number is either 0 (Test Set 1), 1 (Test Set 2) or 2 (Test Set 3).
 
 
