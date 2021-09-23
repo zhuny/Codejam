@@ -174,6 +174,24 @@ class Command:
             with TwoWay(inter.stdout, inter.stdin):
                 runpy.run_path(name, run_name="__main__")
 
+    def integrate(self):
+        """
+        move previous version structure to current version structure
+        """
+        white_list = ["skeleton", "solution"]
+        for folder in self.base.glob("*"):
+            if not folder.is_dir():
+                continue
+            if folder.name in white_list or folder.name.startswith("."):
+                continue
+
+            target_folder = self._get_folder(folder.name)
+            if target_folder.exists():
+                continue
+
+            target_folder.parent.mkdir(parents=True, exist_ok=True)
+            folder.rename(target_folder)
+
 
 def run():
     command = Command()
