@@ -19,6 +19,11 @@
 1. [My Answer](WormholeInOne), [Problem](https://codingcompetitions.withgoogle.com/codejam/round/000000000019ffb9/00000000003386d0)
 1. [Emacs++](EmacsPP), [Problem](https://codingcompetitions.withgoogle.com/codejam/round/000000000019ffb9/000000000033893b)
 
+## 2019
+### Round 2
+[My Submission](https://codingcompetitions.withgoogle.com/codejam/submissions/0000000000051679/emh1bnk)
+1. NewElements: Part1, [My Answer](NewElementsPart1), [Problem](https://codingcompetitions.withgoogle.com/codejam/round/0000000000051679/0000000000146183)
+
 # Kick Start
 
 ## 2021
