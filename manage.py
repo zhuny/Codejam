@@ -3,6 +3,7 @@ import runpy
 import subprocess
 import sys
 import time
+from pathlib import Path
 from shutil import copyfile
 
 
@@ -53,43 +54,84 @@ class Timer:
         print("Running time : {duration:.06}".format(duration=duration))
 
 
+class Hasher:
+    def __init__(self, string):
+        self.string = string
+
+    @staticmethod
+    def char_to_int(char):
+        return ord(char.lower()) - ord('a')
+
+    @staticmethod
+    def int_to_char(number):
+        return chr(ord('A') + number % 26)
+
+    def get(self):
+        nums = [0, 0]
+        for i, char in enumerate(self.string):
+            nums[i % 2] += self.char_to_int(char)
+        return "".join(self.int_to_char(num) for num in nums)
+
+
 class Command:
+    def __init__(self):
+        self.base = Path(".")
+
+    def _get_hash(self, name):
+        return Hasher(name).get()
+
+    def _get_folder(self, name) -> Path:
+        h = self._get_hash(name)
+        return self.base / "solution" / h[0] / h / name
+
+    def _get_skeleton_folder(self) -> Path:
+        return self.base / "skeleton"
+
     def run(self, name):
         """
         Create New Codejam Problem
         code < *.in > *.out
         @name: Name of Problem
         """
-        for inf in os.listdir(name):
-            finf = os.path.join(name, inf)
-            basename, ext = os.path.splitext(inf)
-            if ext == '.in':
-                self._run_in(name, finf, os.path.join(name, basename)+'.out')
+        if not self._get_folder(name).exists():
+            print("create first :", name)
+            return
 
-    def _run_in(self, name, inf, outf):
-        print("test file:", inf)
-        with open(inf) as f_in:
-            with open(outf, 'w') as f_out:
+        for in_file in self._get_folder(name).glob('*.in'):
+            out_file = in_file.parent / f"{in_file.stem}.out"
+            self._run_in(name, in_file, out_file)
+
+    def _run_in(self, name, in_f, out_f):
+        print("test file :", in_f)
+        with in_f.open() as f_in:
+            with out_f.open('w') as f_out:
                 with Timer():
                     with TwoWay(f_in, f_out):
-                        runpy.run_path(name, run_name="__main__")
+                        runpy.run_path(
+                            str(self._get_folder(name)),
+                            run_name="__main__"
+                        )
 
     def create(self, name):
         """
         Create New Codejam Problem
         @name: Name of Problem
         """
-        if os.path.isdir(name):
-            print("exist path : ", name)
-            return
+        f_folder = self._get_folder(name)
+        if f_folder.exists():
+            print("exist path : ", f_folder)
 
-        os.mkdir(name)
-        skeleton = '_skeleton'
-        for f in os.listdir(skeleton):
-            copyfile(
-                os.path.join(skeleton, f),
-                os.path.join(name, f)
-            )
+        else:
+            print("create new problem :", name)
+            f_folder.mkdir(parents=True, exist_ok=True)
+            for temp_file in self._get_skeleton_folder().glob("*"):
+                copyfile(temp_file, f_folder / temp_file.name)
+                print("copy file,", temp_file, "=>", f_folder / temp_file.name)
+
+        print("Goto and Enjoy!")
+
+        main_file = f_folder / "__main__.py"
+        print(f'File "{main_file.absolute()}", line 1')
 
     def version(self):
         """
@@ -120,7 +162,11 @@ class Command:
         execute as interactive mode
         """
         inter = subprocess.Popen(
-            ["python", os.path.join(name, "testing_tool.py"), "2"],
+            [
+                "python",
+                self._get_folder(name) / "testing_tool.py",
+                "2"
+            ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE
         )
