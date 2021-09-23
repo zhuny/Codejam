@@ -20,6 +20,14 @@
 1. [Emacs++](EmacsPP), [Problem](https://codingcompetitions.withgoogle.com/codejam/round/000000000019ffb9/000000000033893b)
 
 # Kick Start
+
+## 2021
+### Round F
+No submission in this round
+1. Trash Bins, [My Answer](solution/A/AX/TrashBins), [Problem](https://codingcompetitions.withgoogle.com/kickstart/round/0000000000435bae/0000000000887c32)
+1. Festival, [My Answer](solution/F/FD/Festival), [Problem](https://codingcompetitions.withgoogle.com/kickstart/round/0000000000435bae/0000000000887dba)
+1. Star Trappers (Not solved), [My Answer](solution/R/RM/StarTrappers), [Problem](https://codingcompetitions.withgoogle.com/kickstart/round/0000000000435bae/0000000000888d45)
+
 ## 2020
 ### Round D
 1. [Record Breaker](RecordBreaker)
