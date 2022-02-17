@@ -192,6 +192,10 @@ class Command:
             target_folder.parent.mkdir(parents=True, exist_ok=True)
             folder.rename(target_folder)
 
+    def show(self, name):
+        path = self._get_folder(name)
+        print(path.as_posix())
+
 
 def run():
     command = Command()
