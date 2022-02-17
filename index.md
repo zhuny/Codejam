@@ -26,6 +26,14 @@
 
 # Kick Start
 
+## 2022
+### Practice Session 1
+1. [Sample Problem](solution/P/PP/SampleProblem)
+2. [Centauri Prime](solution/H/HC/CentauriPrime)
+3. [H-index](solution/Y/YI/HIndex)
+4. [Hex](solution/E/EE/Hex)
+5. [Milk Tea](solution/Q/QW/MilkTea)
+
 ## 2021
 ### Round F
 No submission in this round
